@@ -9,7 +9,7 @@ module.exports = function handler(req, res) {
   if (!text) { res.status(400).json({ error: 'no text' }); return; }
 
   const KEY = process.env.ELEVEN_API_KEY;
-  const VOICE = 'pNInz6obpgDQGcFmaJgB';
+  const VOICE = 'VR6AewLTigWG4xSOukaG';
   const payload = JSON.stringify({ text: text, model_id: 'eleven_turbo_v2', voice_settings: { stability: 0.25, similarity_boost: 0.85, style: 0.75, use_speaker_boost: true } });
 
   const chunks = [];
