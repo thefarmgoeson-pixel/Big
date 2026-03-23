@@ -1,14 +1,16 @@
 const textToSpeech = require('@google-cloud/text-to-speech');
 
-// Initialize the client with credentials from your Env Var
 const client = new textToSpeech.TextToSpeechClient({
   credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON)
 });
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
     const { text } = req.body;
@@ -16,31 +18,25 @@ module.exports = async function handler(req, res) {
 
     const request = {
       input: { text: text },
-      // Gemini-TTS specific configuration
-      voice: { 
-        // Using the Gemini-optimized voice model
-        name: 'en-US-Gemini-1', 
-        languageCode: 'en-US' 
-      },
+      voice: { name: 'en-US-Gemini-1', languageCode: 'en-US' },
       audioConfig: { 
         audioEncoding: 'MP3',
-        speakingRate: 1.1 // Slightly faster for energy
+        speakingRate: 1.05, // Slightly pushed for that rap flow
+        pitch: -1.0         // Slightly deeper, authoritative tone
       },
-      // This is the "Gemini" magic: natural language prompting for the voice
       advancedOptions: {
         model: 'gemini-2.5-flash-tts',
-        prompt: 'Speak in an urgent, loud, and shouting tone as if there is an emergency.'
+        // This is the prompt that gives it the "Biggie" energy
+        prompt: 'Speak like a 90s Brooklyn rapper. Deep voice, rhythmic cadence, confident and slightly gritty.'
       }
     };
 
-    // Performs the text-to-speech request
     const [response] = await client.synthesizeSpeech(request);
-
     res.setHeader('Content-Type', 'audio/mpeg');
     res.status(200).send(response.audioContent);
 
   } catch (error) {
-    console.error('GCP Error:', error);
+    console.error('TTS Error:', error);
     res.status(500).json({ error: error.message });
   }
 };
