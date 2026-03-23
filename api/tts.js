@@ -8,8 +8,7 @@ const text = (req.body || {}).text;
 if (!text) { res.status(400).json({ error: ‘no text’ }); return; }
 const KEY = process.env.ELEVEN_API_KEY;
 const VOICE = ‘TxGEqnHWrfWFTfGW9XjX’;
-const tagged = ‘<prosody rate="fast" volume="loud"><emphasis level="strong">’ + text + ‘</emphasis></prosody>’;
-const payload = JSON.stringify({ text: tagged, model_id: ‘eleven_v3’, voice_settings: { stability: 0.25, similarity_boost: 0.90, style: 1.0, use_speaker_boost: true } });
+const payload = JSON.stringify({ text: text, model_id: ‘eleven_turbo_v2’, voice_settings: { stability: 0.30, similarity_boost: 0.90, style: 0.90, use_speaker_boost: true } });
 const chunks = [];
 const r = https.request({ hostname: ‘api.elevenlabs.io’, path: ‘/v1/text-to-speech/’ + VOICE, method: ‘POST’, headers: { ‘xi-api-key’: KEY.trim(), ‘Content-Type’: ‘application/json’, ‘Accept’: ‘audio/mpeg’, ‘Content-Length’: Buffer.byteLength(payload) } }, function(resp) {
 if (resp.statusCode !== 200) { let e = ‘’; resp.on(‘data’, function(d){ e+=d; }); resp.on(‘end’, function(){ res.status(resp.statusCode).json({ error: e }); }); return; }
