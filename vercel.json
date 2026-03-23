@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/tts.js": {
+    "api/tts.mjs": {
       "runtime": "nodejs20.x"
     }
   }
