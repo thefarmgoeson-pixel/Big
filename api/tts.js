@@ -1,4 +1,4 @@
-const https = require('https'):
+const https = require('https');
 
 module.exports = function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -18,20 +18,20 @@ module.exports = function handler(req, res) {
     const VOICE = '21m00Tcm4TlvDq8ikWAM';
     const payload = JSON.stringify({
       text: '[shouting] ' + text,
-      model_id: 'eleven_v3',
+      model_id: 'eleven_multilingual_v2',
       voice_settings: { stability: 0.25, similarity_boost: 0.90, style: 1.0, use_speaker_boost: true }
     });
 
     const chunks = [];
     const r = https.request({
       hostname: 'api.elevenlabs.io',
-      path: '/v1/text-to-speech/' + VOICE,
+      path: '/v1/text-to-speech/' + VOICE + '/stream',
       method: 'POST',
       headers: { 'xi-api-key': KEY.trim(), 'Content-Type': 'application/json', 'Accept': 'audio/mpeg', 'Content-Length': Buffer.byteLength(payload) }
     }, function(resp) {
       if (resp.statusCode !== 200) { let e = ''; resp.on('data', d => e += d); resp.on('end', () => res.status(resp.statusCode).json({ error: e })); return; }
-      resp.on('data', c => chunks.push(c));
-      resp.on('end', () => { res.setHeader('Content-Type', 'audio/mpeg'); res.send(Buffer.concat(chunks)); });
+      res.setHeader('Content-Type', 'audio/mpeg');
+      resp.pipe(res);
     });
     r.on('error', e => res.status(500).json({ error: e.message }));
     r.write(payload);
