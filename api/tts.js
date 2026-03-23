@@ -9,8 +9,9 @@ module.exports = function handler(req, res) {
   if (!text) { res.status(400).json({ error: 'no text' }); return; }
 
   const KEY = process.env.ELEVEN_API_KEY;
-  const VOICE = 'pNInz6obpgDQGcFmaJgB';
-  const payload = JSON.stringify({ text: text, model_id: 'eleven_turbo_v2', voice_settings: { stability: 0.25, similarity_boost: 0.85, style: 0.75, use_speaker_boost: true } });
+  const VOICE = 'const VOICE = 'ErXwobaYiN019PkySvjV'; // Antoni - higher and faster naturally
+';
+  const payload = JSON.stringify({ text: text, model_id: 'eleven_turbo_v2', voice_settings: { stability: 0.20, similarity_boost: 0.80, style: 0.85, use_speaker_boost: true } });
 
   const chunks = [];
   const r = https.request({ hostname: 'api.elevenlabs.io', path: '/v1/text-to-speech/' + VOICE, method: 'POST', headers: { 'xi-api-key': KEY.trim(), 'Content-Type': 'application/json', 'Accept': 'audio/mpeg', 'Content-Length': Buffer.byteLength(payload) } }, function(resp) {
