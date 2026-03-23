@@ -1,13 +1,20 @@
 const https = require(‘https’);
 
-export default async function handler(req, res) {
-if (req.method !== ‘POST’) return res.status(405).end();
+module.exports = async function handler(req, res) {
+// Allow CORS
+res.setHeader(‘Access-Control-Allow-Origin’, ‘*’);
+res.setHeader(‘Access-Control-Allow-Methods’, ‘POST, OPTIONS’);
+res.setHeader(‘Access-Control-Allow-Headers’, ‘Content-Type’);
+if (req.method === ‘OPTIONS’) return res.status(200).end();
+if (req.method !== ‘POST’) return res.status(405).json({ error: ‘Method not allowed’ });
 
-const { text } = req.body;
+const { text } = req.body || {};
 if (!text) return res.status(400).json({ error: ‘No text provided’ });
 
-const VOICE_ID = ‘ErXwobaYiN019PkySvjV’; // Antoni
 const API_KEY = process.env.ELEVEN_API_KEY;
+if (!API_KEY) return res.status(500).json({ error: ‘Missing ELEVEN_API_KEY env var’ });
+
+const VOICE_ID = ‘ErXwobaYiN019PkySvjV’;
 
 const body = JSON.stringify({
 text,
@@ -35,19 +42,25 @@ headers: {
 
 ```
 const chunks = [];
-const req2 = https.request(options, (resp) => {
-  if (resp.statusCode !== 200) {
-    let err = '';
-    resp.on('data', d => err += d);
-    resp.on('end', () => {
-      res.status(resp.statusCode).json({ error: err });
+
+const request = https.request(options, (response) => {
+  console.log('ElevenLabs status:', response.statusCode);
+
+  if (response.statusCode !== 200) {
+    let errBody = '';
+    response.on('data', d => errBody += d.toString());
+    response.on('end', () => {
+      console.error('ElevenLabs error body:', errBody);
+      res.status(response.statusCode).json({ error: errBody });
       resolve();
     });
     return;
   }
-  resp.on('data', chunk => chunks.push(chunk));
-  resp.on('end', () => {
+
+  response.on('data', chunk => chunks.push(chunk));
+  response.on('end', () => {
     const audio = Buffer.concat(chunks);
+    console.log('Audio bytes:', audio.length);
     res.setHeader('Content-Type', 'audio/mpeg');
     res.setHeader('Cache-Control', 's-maxage=86400');
     res.send(audio);
@@ -55,14 +68,22 @@ const req2 = https.request(options, (resp) => {
   });
 });
 
-req2.on('error', (e) => {
+request.on('error', (e) => {
+  console.error('Request error:', e.message);
   res.status(500).json({ error: e.message });
   resolve();
 });
 
-req2.write(body);
-req2.end();
+request.setTimeout(10000, () => {
+  console.error('Request timed out');
+  request.destroy();
+  res.status(504).json({ error: 'ElevenLabs request timed out' });
+  resolve();
+});
+
+request.write(body);
+request.end();
 ```
 
 });
-}
+};
