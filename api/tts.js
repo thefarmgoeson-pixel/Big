@@ -5,47 +5,36 @@ module.exports = function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { text } = req.body || {};
-  if (!text) return res.status(400).json({ error: 'No text provided' });
+  let body = '';
+  req.on('data', chunk => { body += chunk.toString(); });
+  req.on('end', () => {
+    let text;
+    try { text = JSON.parse(body).text; } catch(e) { return res.status(400).json({ error: 'bad json' }); }
+    if (!text) return res.status(400).json({ error: 'no text' });
 
-  const KEY = process.env.ELEVEN_API_KEY;
-  if (!KEY) return res.status(500).json({ error: 'API Key missing' });
+    const KEY = process.env.ELEVEN_API_KEY;
+    if (!KEY) return res.status(500).json({ error: 'missing key' });
 
-  const payload = JSON.stringify({
-    model_id: 'eleven_v3', // Or 'eleven_turbo_v3'
-    inputs: [{ 
-      text: `[shouting] ${text}`, 
-      voice_id: '21m00Tcm4TlvDq8ikWAM' 
-    }]
+    const VOICE = '21m00Tcm4TlvDq8ikWAM';
+    const payload = JSON.stringify({
+      text: '[shouting] ' + text,
+      model_id: 'eleven_v3',
+      voice_settings: { stability: 0.25, similarity_boost: 0.90, style: 1.0, use_speaker_boost: true }
+    });
+
+    const chunks = [];
+    const r = https.request({
+      hostname: 'api.elevenlabs.io',
+      path: '/v1/text-to-speech/' + VOICE,
+      method: 'POST',
+      headers: { 'xi-api-key': KEY.trim(), 'Content-Type': 'application/json', 'Accept': 'audio/mpeg', 'Content-Length': Buffer.byteLength(payload) }
+    }, function(resp) {
+      if (resp.statusCode !== 200) { let e = ''; resp.on('data', d => e += d); resp.on('end', () => res.status(resp.statusCode).json({ error: e })); return; }
+      resp.on('data', c => chunks.push(c));
+      resp.on('end', () => { res.setHeader('Content-Type', 'audio/mpeg'); res.send(Buffer.concat(chunks)); });
+    });
+    r.on('error', e => res.status(500).json({ error: e.message }));
+    r.write(payload);
+    r.end();
   });
-
-  const options = {
-    hostname: 'api.elevenlabs.io',
-    path: '/v1/text-to-dialogue',
-    method: 'POST',
-    headers: {
-      'xi-api-key': KEY.trim(),
-      'Content-Type': 'application/json',
-      'Accept': 'audio/mpeg'
-    }
-  };
-
-  const r = https.request(options, (resp) => {
-    // Check for ElevenLabs specific errors
-    if (resp.statusCode !== 200) {
-      let errorData = '';
-      resp.on('data', (d) => { errorData += d; });
-      resp.on('end', () => res.status(resp.statusCode).send(errorData));
-      return;
-    }
-
-    res.setHeader('Content-Type', 'audio/mpeg');
-    // Stream the response directly to the client instead of buffering in 'chunks'
-    // This is much faster and more memory efficient
-    resp.pipe(res);
-  });
-
-  r.on('error', (e) => res.status(500).json({ error: e.message }));
-  r.write(payload);
-  r.end();
 };
