@@ -10,7 +10,7 @@ module.exports = function handler(req, res) {
 
   const KEY = process.env.ELEVEN_API_KEY;
   const VOICE = 'VR6AewLTigWG4xSOukaG';
-  const payload = JSON.stringify({ text: text, model_id: 'eleven_turbo_v2', voice_settings: { stability: 0.25, similarity_boost: 0.85, style: 0.75, use_speaker_boost: true } });
+  const payload = JSON.stringify({ text: text, model_id: 'eleven_turbo_v2', voice_settings: { stability: 0.15, similarity_boost: 0.75, style: 0.65, use_speaker_boost: true } });
 
   const chunks = [];
   const r = https.request({ hostname: 'api.elevenlabs.io', path: '/v1/text-to-speech/' + VOICE, method: 'POST', headers: { 'xi-api-key': KEY.trim(), 'Content-Type': 'application/json', 'Accept': 'audio/mpeg', 'Content-Length': Buffer.byteLength(payload) } }, function(resp) {
