@@ -10,8 +10,14 @@ module.exports = async function handler(req, res) {
     const { text } = req.body;
     if (!text) return res.status(400).json({ error: 'No text provided' });
 
-    // "Arnold" - Strong, powerful male voice (free tier)
-    const voiceId = 'VR6AewLTigWG4xSOukaG';
+    // "Josh" - Deep, expressive male voice (free tier)
+    const voiceId = 'TxGEqnHWrfWFTfGW9XjX';
+
+    // Add rhythm pauses to push rap-style delivery
+    const formatted = text
+      .replace(/,/g, ', —')
+      .replace(/\.\.\./g, '... ')
+      .replace(/ (and|but|cause|now|when|til|with|from|like|on|in|at|for|to) /gi, ' $1, ');
 
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
       method: 'POST',
@@ -21,11 +27,11 @@ module.exports = async function handler(req, res) {
         'Accept': 'audio/mpeg'
       },
       body: JSON.stringify({
-        text: text,
-        model_id: 'eleven_turbo_v2_5',
+        text: formatted,
+        model_id: 'eleven_multilingual_v2',
         voice_settings: {
-          stability: 0.10,
-          similarity_boost: 0.75,
+          stability: 0.05,
+          similarity_boost: 0.70,
           style: 1.0,
           use_speaker_boost: true
         }
