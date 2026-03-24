@@ -313,6 +313,7 @@ function playLine(i){
     if(!rapOn)return;
     setLoading(false);
     currentAudio=new Audio(url);
+    currentAudio.playbackRate=1.4;
     currentAudio.onended=()=>{if(rapOn)setTimeout(()=>playLine(i+1),130);};
     currentAudio.onerror=()=>{if(rapOn)setTimeout(()=>playLine(i+1),200);};
     currentAudio.play().catch(()=>{if(rapOn)playLine(i+1);});
