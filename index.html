@@ -326,9 +326,12 @@ function startRap(){
   rapOn=true;audioCache={};
   const btn=document.getElementById('rapBtn');
   btn.textContent='⏹ STOP';btn.classList.add('rapping');
-  prefetch(0,3);
   setLoading(true);
-  setTimeout(()=>{if(rapOn)playLine(0);},2000);
+  fetchLine(0).then(url=>{
+    audioCache[0]=url;
+    prefetch(1,4);
+    if(rapOn)playLine(0);
+  }).catch(()=>{if(rapOn)playLine(0);});
 }
 function stopRap(){
   rapOn=false;
