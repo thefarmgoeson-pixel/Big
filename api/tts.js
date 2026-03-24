@@ -13,12 +13,6 @@ module.exports = async function handler(req, res) {
     // "Adam" - Deep male voice (free tier)
     const voiceId = 'pNInz6obpgDQGcFmaJgB';
 
-    // Add rhythm pauses to push rap-style delivery
-    const formatted = text
-      .replace(/,/g, ', —')
-      .replace(/\.\.\./g, '... ')
-      .replace(/ (and|but|cause|now|when|til|with|from|like|on|in|at|for|to) /gi, ' $1, ');
-
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
       method: 'POST',
       headers: {
@@ -27,7 +21,7 @@ module.exports = async function handler(req, res) {
         'Accept': 'audio/mpeg'
       },
       body: JSON.stringify({
-        text: formatted,
+        text: text,
         model_id: 'eleven_multilingual_v2',
         voice_settings: {
           stability: 0.05,
