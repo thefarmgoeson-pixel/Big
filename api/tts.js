@@ -10,8 +10,8 @@ module.exports = async function handler(req, res) {
     const { text } = req.body;
     if (!text) return res.status(400).json({ error: 'No text provided' });
 
-    // "Adam" - Deep, authoritative pre-built voice
-    const voiceId = 'pNInz6obpgDQGcFmaJgB';
+    // "Sam" - Energetic, intense male voice
+    const voiceId = 'yoZ06aMxZJJ28mfd3POQ';
 
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
       method: 'POST',
@@ -22,11 +22,12 @@ module.exports = async function handler(req, res) {
       },
       body: JSON.stringify({
         text: text,
-        model_id: 'eleven_multilingual_v2',
+        model_id: 'eleven_v3',
         voice_settings: {
-          stability: 0.25,        // Low = more emotive/variable (good for rap)
-          similarity_boost: 0.90,
-          style: 0.75,            // More attitude/character
+          stability: 0.10,        // Very low = aggressive/variable delivery
+          similarity_boost: 0.75,
+          style: 1.0,             // Max intensity
+          speed: 1.2,             // Faster delivery
           use_speaker_boost: true
         }
       })
