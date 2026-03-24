@@ -10,8 +10,8 @@ module.exports = async function handler(req, res) {
     const { text } = req.body;
     if (!text) return res.status(400).json({ error: 'No text provided' });
 
-    // "Marcus" - Deep, raspy, authoritative. Perfect for those avocado bars.
-    const voiceId = 'XPpxO97N9mS9Vvdfz9uK'; 
+    // "Adam" - Deep, authoritative pre-built voice
+    const voiceId = 'pNInz6obpgDQGcFmaJgB';
 
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
       method: 'POST',
@@ -22,12 +22,11 @@ module.exports = async function handler(req, res) {
       },
       body: JSON.stringify({
         text: text,
-        // Using Turbo v2.5 for the lowest latency and best "human" flow
-        model_id: 'eleven_turbo_v2_5', 
+        model_id: 'eleven_multilingual_v2',
         voice_settings: {
-          stability: 0.30,       // Lower = more emotive/variable (good for rap)
-          similarity_boost: 0.85, // Keeps the character consistent
-          style: 0.65,           // Adds more "attitude" to the delivery
+          stability: 0.25,        // Low = more emotive/variable (good for rap)
+          similarity_boost: 0.90,
+          style: 0.75,            // More attitude/character
           use_speaker_boost: true
         }
       })
