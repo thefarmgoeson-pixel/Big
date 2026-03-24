@@ -10,8 +10,8 @@ module.exports = async function handler(req, res) {
     const { text } = req.body;
     if (!text) return res.status(400).json({ error: 'No text provided' });
 
-    // "Adam" - Deep male voice (free tier)
-    const voiceId = 'pNInz6obpgDQGcFmaJgB';
+    // "Antoni" - Well-rounded male voice (free tier)
+    const voiceId = 'ErXwobaYiN019PkySvjV';
 
     // Add rhythm pauses to push rap-style delivery
     const formatted = text
